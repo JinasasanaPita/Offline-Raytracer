@@ -29,23 +29,16 @@ public:
 		// Cosine weighted
 		SMath::Vector3 scatterDirection = 
 			hitRecord.normal + RandomUnitVector();
-		// scatterDirection = RandomUnitVector();
-		/*do
-		{
-			scatterDirection = RandomUnitVector();
-		} while (SMath::Vector3::Dot(scatterDirection, hitRecord.normal) < 0);*/
+		
 
 		scattered = Ray(hitRecord.hitPoint, scatterDirection);
 		double cosTheta = SMath::Vector3::Dot(scatterDirection,
 			hitRecord.normal);
 		SMath::Vector3 brdf = albedo / pi;
 		double cosineSamplingPDF = cosTheta / pi;
-		double hemisphereSamplingPDF = 1 / (2 * pi);
-
-		// attenuation = albedo * abs(cos(SMath::Vector3::Angle(r_in.direction(), hitRecord.normal)));
+		
 		attenuation = brdf * cosTheta / cosineSamplingPDF;
 
-		/*attenuation = albedo;*/
 		return true;
 	}
 
@@ -71,4 +64,35 @@ public:
 private:
 	SMath::Vector3 albedo;
 	double fuzz;
+};
+
+class Dielectric : public Material
+{
+public:
+	Dielectric(double _ior) : ior(_ior) {}
+
+	bool Scatter(const Ray& r_in, const HitRecord& hitRecord,
+		SMath::Vector3& attenuation, Ray& scattered) const override
+	{
+		attenuation = SMath::Vector3(1.0, 1.0, 1.0);
+		double refractionRatio = hitRecord.isFrontFacing ? (1.0 / ior) : ior;
+
+		SMath::Vector3 unitDirection = r_in.direction().Normalized();
+		double cosTheta = fmin(SMath::Vector3::Dot(-unitDirection, hitRecord.normal), 1.0);
+		double sinTheta = sqrt(1.0 - cosTheta * cosTheta);
+
+		bool rayCannotRefract = refractionRatio * sinTheta > 1.0;
+		SMath::Vector3 direction;
+
+		if (rayCannotRefract)
+			direction = Vector3::Reflect(unitDirection, hitRecord.normal);
+		else
+			direction = Refract(unitDirection, hitRecord.normal, refractionRatio);
+
+		scattered = Ray(hitRecord.hitPoint, direction);
+		return true;
+	}
+
+private:
+	double ior;
 };

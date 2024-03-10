@@ -81,6 +81,7 @@ SMath::Vector3 Camera::GetRayColor(const Ray& r, const Scene& scene, int depth)
 
 		// Lambert's Diffused
 		/*SMath::Vector3 direction = hitPoint.normal + RandomUnitVector();*/
+
 		Ray scattered;
 		SMath::Vector3 attenuation;
 		if (hitPoint.mat->Scatter(r, hitPoint, attenuation, scattered))

@@ -60,5 +60,9 @@ inline SMath::Vector3 FindHemisphereOrientation(const SMath::Vector3 normal)
 inline SMath::Vector3 Refract(const SMath::Vector3& uv, const SMath::Vector3& normal,
 	double etai_over_etat)
 {
-
+	double cosTheta = fmin(SMath::Vector3::Dot(-uv, normal), 1.0);
+	SMath::Vector3 r_out_perpendicular = (uv + normal * cosTheta) * etai_over_etat;
+	SMath::Vector3 r_out_parallel = normal * -sqrt(fabs(1.0 - 
+		r_out_perpendicular.SquareMagnitude()));
+	return r_out_perpendicular + r_out_parallel;
 }
