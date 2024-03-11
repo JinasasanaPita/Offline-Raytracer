@@ -26,8 +26,7 @@ public:
 class Hittable
 {
 public:
-	std::shared_ptr<Material> mat;
-
+	
 	virtual ~Hittable() = default;
 	virtual bool Hit(const Ray& r, Interval ray_t, HitRecord& rec) const = 0;
 };

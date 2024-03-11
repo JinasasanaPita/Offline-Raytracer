@@ -33,7 +33,6 @@ public:
 				hitAnything = true;
 				closestSoFar = tempRec.t;
 				hitRecord = tempRec;
-				hitRecord.mat = object->mat;
 			}
 		}
 

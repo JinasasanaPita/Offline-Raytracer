@@ -55,7 +55,8 @@ public:
 	bool Scatter(const Ray& r_in, const HitRecord& hitRecord,
 		SMath::Vector3& attenuation, Ray& scattered) const override
 	{
-		SMath::Vector3 reflected = Vector3::Reflect(r_in.direction().Normalized(), hitRecord.normal);
+		SMath::Vector3 reflected = Vector3::Reflect(r_in.direction().Normalized(), 
+			hitRecord.normal);
 		scattered = Ray(hitRecord.hitPoint, reflected + RandomUnitVector() * fuzz);
 		attenuation = albedo;
 		return true;
@@ -84,7 +85,7 @@ public:
 		bool rayCannotRefract = refractionRatio * sinTheta > 1.0;
 		SMath::Vector3 direction;
 
-		if (rayCannotRefract)
+		if (rayCannotRefract || Reflectance(cosTheta, refractionRatio) > RandomDouble())
 			direction = Vector3::Reflect(unitDirection, hitRecord.normal);
 		else
 			direction = Refract(unitDirection, hitRecord.normal, refractionRatio);
@@ -95,4 +96,12 @@ public:
 
 private:
 	double ior;
+
+	static double Reflectance(double cosine, double refractiveIndex)
+	{
+		// Schlicks approximation
+		double r0 = (1 - refractiveIndex) / (1 + refractiveIndex);
+		r0 = r0 * r0;
+		return r0 + (1 - r0) * pow((1 - cosine), 5);
+	}
 };

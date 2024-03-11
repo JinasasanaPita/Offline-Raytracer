@@ -43,6 +43,16 @@ inline SMath::Vector3 RandomInUnitSphere()
 	}
 }
 
+inline SMath::Vector3 RandomUnitDisk()
+{
+	while (true)
+	{
+		SMath::Vector3 p = SMath::Vector3(RandomDouble(-1, 1), RandomDouble(-1, 1), 0);
+		if (p.SquareMagnitude() < 1)
+			return p;
+	}
+}
+
 inline SMath::Vector3 RandomUnitVector()
 {
 	return RandomInUnitSphere().Normalized();
