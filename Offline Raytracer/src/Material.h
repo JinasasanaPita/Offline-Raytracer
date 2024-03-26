@@ -46,6 +46,50 @@ private:
 	SMath::Vector3 albedo;
 };
 
+class OrenNayer : public Material
+{
+public:
+	OrenNayer(const SMath::Vector3& _albedo, const double _roughness) :
+		albedo(_albedo), roughness(_roughness) {}
+
+	bool Scatter(const Ray& r_in, const HitRecord& hitRecord,
+		SMath::Vector3& attenuation, Ray& scattered) const override
+	{
+		SMath::Vector3 scatterDirection =
+			hitRecord.normal + RandomUnitVector();
+
+		scattered = Ray(hitRecord.hitPoint, scatterDirection);
+
+		SMath::Vector3 L1;
+		SMath::Vector3 L2;
+		SMath::Vector3 C1;
+		SMath::Vector3 C2;
+		SMath::Vector3 C3;
+
+		double a = std::max(SMath::Vector3::Angle(scatterDirection, hitRecord.normal),
+			SMath::Vector3::Angle(r_in.direction(), hitRecord.normal));
+		double b = std::min(SMath::Vector3::Angle(scatterDirection, hitRecord.normal),
+			SMath::Vector3::Angle(r_in.direction(), hitRecord.normal));
+
+		double roughnessSquared = pow(roughness, 2);
+		double cosTheta = SMath::Vector3::Dot(scatterDirection,
+			hitRecord.normal);
+
+		C1 = 1 - 0.5 * (roughnessSquared / (roughnessSquared + 0.33));
+		// C2: Might be handles wrongly, missing if flux_i - flux_r < 0
+		C2 = 0.45 * (roughnessSquared / (roughnessSquared + 0.09)) * sin(a);
+		C3 = 0.125 * (roughnessSquared / (roughnessSquared + 0.09)) *
+			pow(((4 * a * b) / pow(pi, 2)), 2);
+
+		// L1: missing E_0 term
+		// L1 = (albedo / pi) * cosTheta * (C1 + C2 * )
+	}
+
+private:
+	SMath::Vector3 albedo;
+	double roughness;
+};
+
 class Metal : public Material
 {
 public:
